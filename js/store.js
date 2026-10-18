@@ -51,6 +51,33 @@
       write(K.settings, this.settings);
       write(K.progress, this.progress);
       write(K.log, this.log);
+      if (typeof this.onSaved === 'function') this.onSaved();
+    },
+
+    /** 合併雲端資料：每張卡以最後複習時間較新者為準；每日紀錄取較大值；設定沿用本機 */
+    mergeRemote(o) {
+      if (!o || typeof o.progress !== 'object') return;
+      const rp = o.progress || {};
+      for (const w in rp) {
+        const l = this.progress[w];
+        if (!l || (rp[w][5] || 0) > (l[5] || 0)) this.progress[w] = rp[w];
+      }
+      const rl = o.log || {};
+      for (const d in rl) {
+        const l = this.log[d];
+        if (!l) this.log[d] = rl[d];
+        else {
+          l.n = Math.max(l.n || 0, rl[d].n || 0);
+          l.r = Math.max(l.r || 0, rl[d].r || 0);
+          l.ok = Math.max(l.ok || 0, rl[d].ok || 0);
+        }
+      }
+      this.flush();
+    },
+    getSyncCode() { return localStorage.getItem('toeic.synccode.v1') || ''; },
+    setSyncCode(c) {
+      if (c) localStorage.setItem('toeic.synccode.v1', c);
+      else localStorage.removeItem('toeic.synccode.v1');
     },
 
     dayKey(ts) {

@@ -632,7 +632,34 @@
         <button type="button" class="btn sm danger" id="btn-reset">清除全部進度</button>
         <input type="file" id="file-import" accept="application/json,.json" hidden>
       </div>
-      <p class="muted">進度會自動儲存在這個瀏覽器（localStorage）。</p>`;
+      <p class="muted">進度會自動儲存在這個瀏覽器（localStorage）。</p>
+
+      <div class="sec-title">雲端同步</div>
+      ${syncHTML()}`;
+  }
+
+  function syncHTML() {
+    const code = Store.getSyncCode();
+    if (!code) {
+      return `<p class="muted">在多台裝置間同步進度。同步碼就是你的密鑰，請勿分享給別人。</p>
+        <div class="btn-row">
+          <button type="button" class="btn sm primary" id="btn-sync-on">開啟同步（產生新同步碼）</button>
+        </div>
+        <div class="field"><label for="sync-input">已有同步碼？貼在這裡</label>
+          <input type="text" id="sync-input" autocomplete="off" spellcheck="false" placeholder="貼上其他裝置的同步碼">
+          <div class="btn-row"><button type="button" class="btn sm" id="btn-sync-join">使用此同步碼</button></div></div>`;
+    }
+    const st = Sync.status === 'syncing' ? '同步中…'
+      : Sync.status === 'error' ? '同步失敗：' + Sync.error
+      : Sync.lastAt ? '上次同步：' + new Date(Sync.lastAt).toLocaleString() : '尚未同步';
+    return `<p class="muted" id="sync-status">${st}</p>
+      <div class="field"><label for="sync-code">你的同步碼（在其他裝置貼上即可同步）</label>
+        <input type="text" id="sync-code" readonly value="${code}"></div>
+      <div class="btn-row">
+        <button type="button" class="btn sm primary" id="btn-sync-now">立即同步</button>
+        <button type="button" class="btn sm" id="btn-sync-copy">複製同步碼</button>
+        <button type="button" class="btn sm danger" id="btn-sync-off">停用同步</button>
+      </div>`;
   }
 
   function wireSettings() {
@@ -671,6 +698,20 @@
       } else if (b.id === 'btn-export') return exportProgress();
       else if (b.id === 'btn-import') return $('file-import').click();
       else if (b.id === 'btn-reset') return resetAll();
+      else if (b.id === 'btn-sync-on') { Store.setSyncCode(Sync.newCode()); Sync.now(); }
+      else if (b.id === 'btn-sync-join') {
+        const c = ($('sync-input').value || '').trim();
+        if (!Sync.validCode(c)) return toast('同步碼格式不正確');
+        Store.setSyncCode(c); Sync.now();
+      }
+      else if (b.id === 'btn-sync-now') { Sync.now(); return; }
+      else if (b.id === 'btn-sync-copy') {
+        return navigator.clipboard.writeText(Store.getSyncCode()).then(() => toast('已複製同步碼'), () => toast('請手動選取複製'));
+      }
+      else if (b.id === 'btn-sync-off') {
+        if (!confirm('停用後此裝置不再同步（雲端資料仍保留）。確定嗎？')) return;
+        Store.setSyncCode('');
+      }
       else return;
       const keep = $('dlg-settings').querySelector('.dlg-body').scrollTop;
       renderSettings();
@@ -795,6 +836,12 @@
     // 設定
     $('btn-settings').addEventListener('click', () => { renderSettings(); $('dlg-settings').showModal(); });
     wireSettings();
+    Sync.onChange(() => { if ($('dlg-settings').open) { const el = $('sync-status'); if (el || Store.getSyncCode()) { const keep = $('dlg-settings').querySelector('.dlg-body').scrollTop; renderSettings(); $('dlg-settings').querySelector('.dlg-body').scrollTop = keep; } } });
+    Sync.onMerged = () => {
+      Object.assign(S, Store.settings); updateStreak();
+      if ($('dlg-settings').open) settingsDirty = true;
+      else { buildQueue(); showCard({ silent: true }); if (view === 'browse') refreshBrowse(); if (view === 'stats') renderStats(); }
+    };
     $('dlg-settings').addEventListener('close', () => {
       if (settingsDirty) { settingsDirty = false; buildQueue(); showCard({ silent: true }); if (view === 'browse') refreshBrowse(); if (view === 'stats') renderStats(); }
     });

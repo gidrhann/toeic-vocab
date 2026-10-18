@@ -1,0 +1,12 @@
+name = "toeic-sync"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+routes = [
+  { pattern = "toeic-api.gidrhann.com", custom_domain = true }
+]
+
+[[kv_namespaces]]
+binding = "SYNC"
+id = "89ef15afa81a4baca3fbced353b56f22"
+
