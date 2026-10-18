@@ -6,6 +6,12 @@
   <title>多益互動單字卡｜11,000 字 SRS 間隔重複・HANN</title>
   <meta name="description" content="11,000+ 多益單字互動單字卡：SRS 間隔重複、單字真人發音、鍵盤快速操作、自動儲存學習進度。免安裝，打開就能背。">
   <meta name="theme-color" content="#EAEDF1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="多益單字卡">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" href="assets/hannlogo-64.png">
   <link rel="apple-touch-icon" href="assets/hannlogo-256.png">
   <script>
@@ -96,7 +102,7 @@
                   <svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>
                 </button>
               </div>
-              <div class="face-foot"><kbd>Space</kbd> 或點擊卡片翻面</div>
+              <div class="face-foot"><span class="kbd-only"><kbd>Space</kbd> 或</span>點擊卡片翻面</div>
             </article>
 
             <!-- 背面 -->
@@ -200,7 +206,7 @@
     <section class="view" id="view-stats" aria-labelledby="stats-title">
       <div class="panel-head">
         <h2 id="stats-title">學習統計</h2>
-        <p class="muted">進度只儲存在你的瀏覽器，換裝置請用「設定 → 匯出進度」。</p>
+        <p class="muted">進度存在這個瀏覽器，要跨裝置請到「設定 → 雲端同步」。</p>
       </div>
       <div class="kpis" id="kpis"></div>
       <div class="grid-2">
@@ -262,6 +268,7 @@
   <script src="js/srs.js" defer></script>
   <script src="js/audio.js" defer></script>
   <script src="js/sync.js" defer></script>
+  <script src="js/mobile.js" defer></script>
   <script src="js/app.js" defer></script>
 </body>
 </html>
